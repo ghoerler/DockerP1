@@ -1,0 +1,144 @@
+# Lernziele
+
+- [x] [Sie kennen den Begriff von "Container" und können Begriffe wie Docker Image, Dockerfile, Docker-Container und Docker-Registry erklären.](#begriffe)
+- [x] [Sie können die Begriffe Virtualisierung und Cloud voneinander trennen.](#virtualisierung-vs-cloud)
+- [x] [Sie können einen Docker-Container ausführen und interaktiv verwenden.](#docker-container-ausführen)
+- [x] [Sie erkennen, warum Portweiterleitungen wichtig sind und können eine solche in Betrieb nehmen.](#portweiterleitungen)
+- [x] [Sie können mit Docker Volumes umgehen.](#dockervolumes)
+- [x] [Sie können Volumes benennen und in einem definierten Verzeichnis speichern.](#dockervolumes)
+- [x] [Sie verstehen den Standardaufbau eines Netzwerks mit Docker.](#netzwerk)
+- [x] [Sie können eigene Netzwerkdefinitionen mit Docker umsetzen.](#eigene-netzwerkdefinitionen)
+- [x] [Sie kennen die wichtigsten Befehle um Docker zu administrieren, dazu zählen Platzbedarf von Images und Containern ermitteln, Container und Images löschen, Volumes verwalten, Gesamtüberblick erhalten und Ungenutzten Speicher freigeben](#wichtigsten-befehle)
+
+## Links
+Während der Prüfung kann das Internet genutzt werden. Hier ist eine kurze Referenz, um Zeit zu sparen.
+
+- https://gbssg.gitlab.io/m169/
+- https://docker-curriculum.com/
+- https://www.geeksforgeeks.org/docker-tutorial/
+- https://www.tutorialspoint.com/docker/index.htm
+
+## Begriffe
+- **Container**: Ein isoliertes System, das eine Anwendung mit allen Abhängigkeiten enthält. Läuft auf einem Host-System, ohne dass ein eigenes Betriebssystem benötigt wird.
+
+- **Docker Image**: Eine Vorlage, aus der Container erstellt werden. Enthält alle notwendigen Daten wie das Betriebssystem, Abhängigkeiten und die Anwendung selbst.
+
+- **Dockerfile**: Eine Textdatei, die die Bauanleitung für ein Docker Image enthält. Definiert, welche Basis-Images, Software und Konfigurationen enthalten sein sollen.
+
+- **Docker-Container**: Eine laufende Instanz eines Docker-Images. Jeder Container basiert auf einem bestimmten Image und kann unabhängig ausgeführt werden.
+
+- **Docker-Registry**: Eine Art "App Store" für Docker-Images. Hier werden Images gespeichert und verwaltet. Beispiele: Docker Hub, Google Container Registry, Azure Container Registry.
+
+## Virtualisierung vs. Cloud
+- **Virtualisierung**: Mehrere virtuelle Maschinen (VMs) laufen auf einem Host-System. Jede VM hat ihr eigenes Betriebssystem.
+
+- **Cloud**: Ein Dienst, der Infrastruktur, Plattformen oder Software über das Internet bereitstellt. Docker-Container können in der Cloud gehostet werden.
+
+## Docker-Container ausführen
+```bash
+docker run <container-name>
+docker run hello-world # Beispiel
+```
+
+Interaktive Modus:
+```bash
+docker run -it <container-name> bash
+docker run -it ubuntu bash # Beispiel
+```
+
+## Portweiterleitungen
+
+```bash
+docker run -d -p <host-port>:<container-port> <container-name>
+docker run -d -p 8080:80 nginx # Beispiel
+```
+
+- `-d`: Detached/Daemon mode
+- `-p 8080:80`: Leitet Port 8080 des Hosts auf Port 80 im Container um.
+
+## Dockervolumes
+Volumes sind wichtig, um Daten ausserhalb des Containers zu speichern. Ohne Volumes gehen Daten verloren, wenn der Container gelöscht wird.
+
+Ein anonymes Volume erstellen:
+```bash
+docker run -v /data <container-name>
+docker run -v /data ubuntu # Beispiel
+```
+
+Mit einem benannten Volume arbeiten:
+```bash
+# Benanntes Volume (wiederverwendbar, aber Speicherort bleibt Docker-verwaltet):
+docker volume create mein_volume
+docker run -v mein_volume:/app ubuntu
+```
+
+Beispiel für Volumes mit festem Speicherort auf dem Host-System:
+```bash
+docker run -v /pfad/auf/host:/app ubuntu
+```
+
+## Netzwerk
+Docker nutzt standardmäßig drei Netzwerkmodi:
+1. Bridge (Standardmodus für Container, isoliert vom Host)
+2. Host (Container teilt Netzwerk mit Host)
+3. None (Kein Netzwerk)
+
+Den aktuellen Netzwerkstatus anzeigen:
+```bash
+docker network ls
+```
+
+## Eigene Netzwerkdefinitionen
+
+```bash
+docker network create --driver=bridge --subnet=10.10.10.0/24 --gateway=10.10.10.1 my_net
+
+docker network create my_net # weniger detailiert
+
+docker run -d --net=my_net --name container1 ubuntu
+docker run -d --net=my_net --name container2 ubuntu
+```
+
+Jetzt können sich `container1` und `container2` über ihre Namen im Netzwerk erreichen.
+
+## Wichtigsten Befehle
+
+Platzbedarf von Images und Containern ermitteln:
+```bash
+docker system df
+```
+
+Alle Container anzeigen (auch gestoppte):
+```bash
+docker ps -a
+```
+
+Container löschen:
+```bash
+docker rm container_id
+```
+
+Alle gestoppten Container löschen:
+```bash
+docker container prune
+```
+
+Alle nicht genutzten Images löschen:
+```bash
+docker image prune -a
+```
+
+Alle Volumes anzeigen:
+```bash
+docker volume ls
+```
+
+Nicht mehr benötigte Volumes löschen:
+```bash
+docker volume prune
+```
+
+Gesamtsystem aufräumen (Container, Images, Volumes und Caches entfernen):
+```bash
+docker system prune -a
+```
